@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Tuyue</string>
+    <string name="network_cannot_connect">网络无法连接，请前往设置</string>
+    <string name="setting">设置</string>
+</resources>
