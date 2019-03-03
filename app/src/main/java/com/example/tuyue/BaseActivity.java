@@ -5,14 +5,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import com.example.tuyue.util.NetworkUtil;
 
 @SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity {
@@ -49,9 +49,9 @@ public class BaseActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            ConnectivityManager connectivityManager = (ConnectivityManager)
-                    getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+//            ConnectivityManager connectivityManager = (ConnectivityManager)
+//                    getSystemService(Context.CONNECTIVITY_SERVICE);
+//            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
 //            Network[] networks = connectivityManager.getAllNetworks();
 //            boolean net = false;
@@ -67,7 +67,22 @@ public class BaseActivity extends AppCompatActivity {
 //
 //            }
 
-            if (networkInfo == null || !networkInfo.isConnected()){
+//            if (networkInfo == null || !networkInfo.isConnected()){
+//                Snackbar.make(mView, R.string.network_cannot_connect,Snackbar.LENGTH_LONG)
+//                        .setAction(R.string.setting, new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View v) {
+//                                //跳转到设置界面
+//                                Intent intent =  new Intent(Settings.ACTION_SETTINGS);
+//                                startActivity(intent);
+//                            }
+//                        })
+//                        .setActionTextColor(getResources().getColor(R.color.white))
+//                        .show();
+//            }
+
+            //网络不可用
+            if (!NetworkUtil.isConnected(context)){
                 Snackbar.make(mView, R.string.network_cannot_connect,Snackbar.LENGTH_LONG)
                         .setAction(R.string.setting, new View.OnClickListener() {
                             @Override
