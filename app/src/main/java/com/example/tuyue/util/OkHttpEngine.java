@@ -42,7 +42,7 @@ public class OkHttpEngine {
                 throw new ExceptionInInitializerError("OkHttpEngine:can't mkdir the dir");
             }
         }
-        int cacheSize = 50*1024*1024;         //50M 硬盘缓存
+        int cacheSize = 500*1024*1024;         //500M 硬盘缓存
         Cache cache = new Cache(cacheDir.getAbsoluteFile(),cacheSize);
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)

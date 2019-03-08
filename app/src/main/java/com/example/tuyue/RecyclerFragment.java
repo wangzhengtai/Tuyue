@@ -1,5 +1,6 @@
 package com.example.tuyue;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,9 +12,14 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.example.tuyue.database.PictureInfo;
+import com.example.tuyue.database.PictureTable;
+import com.example.tuyue.database.SQLiteHelper;
 import com.example.tuyue.model.Datas;
 import com.example.tuyue.model.Picture;
+import com.example.tuyue.util.NetworkUtil;
 import com.example.tuyue.util.OkHttpEngine;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -38,6 +44,7 @@ public class RecyclerFragment extends Fragment {
 
     private static final String CATEGORY_CID = "CATEGORY_CID";
     private int mCid;          //图片种类id
+    private PictureTable mPictureTable;
 
     private RecyclerView mRecyclerView;
     private RecyclerAdapter mRecyclerAdapter;
@@ -77,14 +84,28 @@ public class RecyclerFragment extends Fragment {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 Log.d(TAG, "onScrolled: onScrolled!");
-                OkHttpEngine okHttpEngine = OkHttpEngine.getInstance(getContext());
-                okHttpEngine.cancelAllCall();
+//                OkHttpEngine okHttpEngine = OkHttpEngine.getInstance(getContext());
+//                okHttpEngine.cancelAllCall();
             }
         });
-        getPictureFromNetwork();
+        mPictureTable = new PictureTable(getActivity());
+        getPictureUrls();
     }
 
-    private void getPictureFromNetwork(){
+    private void getPictureUrls(){
+        //查询当前类别的url  只要数据库中有就从数据库中获取
+        List<String> urls = mPictureTable.queryUrls(mCid);
+        if (urls.size() != 0){
+            mRecyclerAdapter = new RecyclerAdapter(urls);
+            mRecyclerView.setAdapter(mRecyclerAdapter);
+            Log.d(TAG, "getPictureUrls: from the database!");
+        }else{
+            getPictureUrlsFromNetwork();
+            Log.d(TAG, "getPictureUrls: from the network!");
+        }
+    }
+
+    private void getPictureUrlsFromNetwork(){
         OkHttpEngine okHttpEngine = OkHttpEngine.getInstance(getContext());
         List<Pair<String,String>> pairs = new ArrayList<>();
         pairs.add(new Pair<>("cid",String.valueOf(mCid)));
@@ -102,15 +123,35 @@ public class RecyclerFragment extends Fragment {
                     Datas<Picture> datas = gson.fromJson(response.body().string(),
                             new TypeToken<Datas<Picture>>(){}.getType());
 
+                    //网络请求   插入数据库
+                    List<Picture> pictures = datas.getData();
+                    saveUrls(pictures);
+                    List<String> urls = new ArrayList<>();
+                    for (Picture picture:pictures){
+                        urls.add(picture.getUrl());
+                    }
+
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mRecyclerAdapter = new RecyclerAdapter(datas.getData());
+                            mRecyclerAdapter = new RecyclerAdapter(urls);
                             mRecyclerView.setAdapter(mRecyclerAdapter);
                         }
                     });
                 }
             }
         });
+    }
+
+    //删除原有当前类别的所有url，再保存新的url
+    private void saveUrls(List<Picture> pictures){
+        mPictureTable.delete(mCid);
+        for (Picture picture:pictures){
+            mPictureTable.insert(picture);
+        }
+    }
+
+    private void showToast(String str){
+        Toast.makeText(getActivity(),str,Toast.LENGTH_SHORT).show();
     }
 }

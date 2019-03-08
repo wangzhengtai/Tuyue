@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +17,13 @@ import java.util.List;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
-    private List<Picture> mPictures;
+    private static final String TAG = "RecyclerAdapter";
+
+    private List<String> mUrls;
     private Context mContext;
 
-    public RecyclerAdapter(List<Picture> pictures){
-        mPictures = pictures;
+    public RecyclerAdapter(List<String> urls){
+        mUrls = urls;
     }
 
     @NonNull
@@ -31,19 +34,23 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(
                 R.layout.item_recycler,viewGroup,false);
+        Log.d(TAG, "onCreateViewHolder: i:"+i);
+        Log.d(TAG, "onCreateViewHolder: ********************************************************************");
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        String url = mPictures.get(i).getUrl();
+        String url = mUrls.get(i);
+        Log.d(TAG, "onBindViewHolder: i:"+i+"  url:"+url);
+        Log.d(TAG, "onCreateViewHolder: ********************************************************************");
         viewHolder.mImageView.setTag(url);
         ImageLoader.getInstance(mContext).loadBitmap(url,viewHolder.mImageView);
     }
 
     @Override
     public int getItemCount() {
-        return mPictures.size();
+        return mUrls.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder{
